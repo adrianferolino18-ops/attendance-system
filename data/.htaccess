@@ -1,0 +1,9 @@
+# Block ALL web access to this folder (users.csv, attendance.csv, lockouts.json, faces/).
+# Works on Apache / XAMPP. It does NOT work with "php -S" (the built-in server ignores .htaccess).
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
