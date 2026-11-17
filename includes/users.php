@@ -7,17 +7,21 @@
 require_once __DIR__ . '/csv_helper.php';
 
 /** Returns an error message, or null if the data is valid. */
-function validateUserData(string $userId, string $name, string $pin, array $descriptor): ?string {
+function validateUserData(string $userId, string $name, string $pin, array $descriptor = []): ?string {
     if (!preg_match('/^[A-Za-z0-9_-]{3,20}$/', $userId))
         return 'Employee ID must be 3-20 letters, numbers, - or _.';
     if (!preg_match("/^[A-Za-z][A-Za-z .'-]{1,49}$/", $name))
         return 'Name must be 2-50 letters.';
     if (!preg_match('/^\d{4,6}$/', $pin))
         return 'PIN must be 4-6 digits.';
-    if (count($descriptor) !== FACE_DESCRIPTOR_LENGTH)
-        return 'Face data is invalid. Please scan your face again.';
-    foreach ($descriptor as $n) {
-        if (!is_numeric($n)) return 'Face data is invalid. Please scan your face again.';
+    // Face photos are saved by Member 3's Python service (data/faces/<user_id>/), so the descriptor
+    // is optional now. If one IS given (old face-api.js style), it must still be valid.
+    if ($descriptor !== []) {
+        if (count($descriptor) !== FACE_DESCRIPTOR_LENGTH)
+            return 'Face data is invalid. Please scan your face again.';
+        foreach ($descriptor as $n) {
+            if (!is_numeric($n)) return 'Face data is invalid. Please scan your face again.';
+        }
     }
     return null;
 }
@@ -26,7 +30,7 @@ function validateUserData(string $userId, string $name, string $pin, array $desc
  * Registers a new user. PIN is hashed, descriptor is stored as JSON.
  * @return array ['success' => bool, 'error' => string]
  */
-function createUser(string $userId, string $name, string $pin, array $descriptor): array {
+function createUser(string $userId, string $name, string $pin, array $descriptor = []): array {
     $err = validateUserData($userId, $name, $pin, $descriptor);
     if ($err) return ['success' => false, 'error' => $err];
 
@@ -34,7 +38,7 @@ function createUser(string $userId, string $name, string $pin, array $descriptor
         'user_id'         => $userId,
         'name'            => $name,
         'pin_hash'        => password_hash($pin, PASSWORD_DEFAULT),
-        'face_descriptor' => json_encode(array_map('floatval', $descriptor)),
+        'face_descriptor' => $descriptor === [] ? '' : json_encode(array_map('floatval', $descriptor)),
         'created_at'      => date('Y-m-d H:i:s'),
     ];
     if (!appendCSVUnique(USERS_CSV, USERS_HEADERS, $row, 'user_id'))
