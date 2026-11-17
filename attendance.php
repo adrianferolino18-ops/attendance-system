@@ -1,22 +1,22 @@
 <?php
-session_start();
+require_once __DIR__ . '/includes/security.php';
 require_once __DIR__ . '/includes/attendance_data.php';
-require_once __DIR__ . '/includes/challenge.php';
+secureSessionStart();
 
 date_default_timezone_set('Asia/Manila'); 
 
 // the user must be fully logged in (face + PIN)
-if (empty($_SESSION['user_id'])) {
+if (!isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
 
 $userId = $_SESSION['user_id'];
-$name = $_SESSION['name'];
+$name = (string)($_SESSION['user_name'] ?? '');
 
-// user IDs that can see the admin table (edit this list)
-$adminIds = ['admin'];
-$isAdmin = in_array($userId, $adminIds, true);
+// user IDs that can see the admin table (edit this list). IDs are always saved in CAPITAL letters.
+$adminIds = ['ADMIN'];
+$isAdmin = in_array(strtoupper($userId), $adminIds, true);
 
 $message = '';
 $error = '';
@@ -25,7 +25,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
-    if (!csrfCheck($_POST['csrf'] ?? '')) {
+    if (!csrfValid((string)($_POST['csrf_token'] ?? ''))) {
         $error = 'Invalid form. Please try again.';
     } elseif ($action === 'time_in') {
         $result = recordTimeIn($userId, $name);
@@ -74,19 +74,19 @@ require_once __DIR__ . '/includes/header.php';
 </p>
 
 <form method="post" action="attendance.php" style="display:inline;">
-    <input type="hidden" name="csrf" value="<?php echo e(csrfToken()); ?>">
+    <?php echo csrfField(); ?>
     <input type="hidden" name="action" value="time_in">
     <button class="btn" type="submit">Time In</button>
 </form>
 
 <form method="post" action="attendance.php" style="display:inline;">
-    <input type="hidden" name="csrf" value="<?php echo e(csrfToken()); ?>">
+    <?php echo csrfField(); ?>
     <input type="hidden" name="action" value="time_out">
     <button class="btn" type="submit">Time Out</button>
 </form>
 
 <form method="post" action="logout.php" style="display:inline;">
-    <input type="hidden" name="csrf" value="<?php echo e(csrfToken()); ?>">
+    <?php echo csrfField(); ?>
     <button class="btn btn-secondary" type="submit">Logout</button>
 </form>
 

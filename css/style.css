@@ -119,3 +119,7 @@ th, td {
 th {
     background: #ecf0f1;
 }
+
+.camera-box video {
+    transform: scaleX(-1);
+}
