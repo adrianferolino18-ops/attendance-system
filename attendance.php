@@ -91,6 +91,7 @@ require_once __DIR__ . '/includes/header.php';
 </form>
 
 <?php if ($isAdmin): ?>
+    <p><a class="btn" href="admin.php">Open admin panel</a></p>
     <h2>Today's Records (Admin)</h2>
     <table>
         <tr>

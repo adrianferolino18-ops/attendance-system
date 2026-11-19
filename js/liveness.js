@@ -26,7 +26,7 @@
     const config = {
         challengeUrl: 'api/challenge.php',
         modelUrl: 'models',
-        faceApiUrl: 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js',
+        faceApiUrl: 'js/face-api.min.js',
         detector: { inputSize: 224, scoreThreshold: 0.5 },
         stepTimeoutMs: 15000,
         blink: {

@@ -1,3 +1,5 @@
+// js/login.js - Step 1 of login (Member 5's page logic).
+// camera -> liveness (js/liveness.js, Member 4) -> one photo -> api/recognize.php -> pin.php
 
 (function () {
     'use strict';
@@ -8,7 +10,7 @@
     var startBtn = document.getElementById('startBtn');
     var stopLoop = null;
 
-  
+    // problems we can simply retry a few times (the person is still getting ready)
     var retryCodes = ['no_face', 'too_small', 'too_dark', 'multiple_faces'];
 
     function setStatus(text) {
@@ -56,15 +58,20 @@
         try {
             setStatus('Starting the camera...');
             await Face.startCamera(video);
-            stopLoop = Face.startLoop(video, overlay, null, { mirrored: true });   // live box (Member 3)
 
+            // The live face box (Member 3) is NOT started yet: during the blink / head-turn check the
+            // browser is already busy finding your eyes, and the extra requests to Python made blinks get missed.
             setStatus('Loading the liveness check...');
             var live = await Liveness.runServerChallenge(video, {
+                // a little more forgiving than the default (0.72 / 0.88), so a normal quick blink is counted
+                config: { blink: { closedRatio: 0.8, openRatio: 0.85 } },
                 onStatus: function (text) { setStatus(text); }
             });
             if (!live.passed) {
                 return fail(live.error || 'Liveness check failed. Please try again.');
             }
+
+            stopLoop = Face.startLoop(video, overlay, null, { mirrored: true });   // live face box (Member 3)
 
             // the liveness pass lasts about 30 seconds, so a few retries are fine
             var result = null;
