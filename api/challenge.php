@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 /**
- * api/challenge.php - Member 4
+ * api/challenge.php  https://github.com/juan-csv/face_liveness_detection-Anti-spoofing
  *
- * POST JSON {"action":"new"}
- *   -> {"ok":true,"token":"...","steps":[{"type":"blink","count":2},{"type":"turn_left"}],"expires_in":60}
+ * POST JSON {"action":"new"} https://github.com/Gourab69420/face-liveness-recognition
+ *   -> {"ok":true,"token":"...","steps":[{"type":"blink","count":2},{"type":"turn_left"}],"expires_in":60} 
  * POST JSON {"action":"verify","token":"...","result":{"steps_done":["blink","turn_left"]}}
  *   -> {"ok":true}   or   {"ok":false,"error":"..."}
  *
